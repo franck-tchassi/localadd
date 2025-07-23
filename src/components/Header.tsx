@@ -37,9 +37,9 @@ const navLinks = [
         name: "Tarifs",
         href: "#tarifs",
         items: [
-            { title: "Starter", href: "#starter", description: "Parfait pour les petites entreprises" },
-            { title: "Pro", href: "#pro", description: "Pour les entreprises en croissance" },
-            { title: "Enterprise", href: "#enterprise", description: "Solution complète sur mesure" },
+            { title: "Starter", href: "/pricing", description: "Parfait pour les petites entreprises" },
+            { title: "Pro", href: "/pricing", description: "Pour les entreprises en croissance" },
+            { title: "Enterprise", href: "/pricing", description: "Solution complète sur mesure" },
         ]
     },
     {
@@ -113,7 +113,7 @@ const Header = () => {
 
                 {/* Actions */}
                 <div className="hidden md:flex items-center gap-2 lg:gap-3">
-                    <Link href="/login">
+                    <Link href="/signin">
                         <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-colors font-semibold px-5 py-2 rounded-lg shadow-none">Se connecter</Button>
                     </Link>
                     <Link href="/demo">
