@@ -10,9 +10,10 @@ import { debounce } from 'lodash'
 
 //import LocaleSelectLanguage from '@/app/[locale]/LocaleSelectLanguage'
 import ShopSeller from '../info/Info'
+import Info from '../info/Info'
 
 
-const NavbarTop = () => {
+const NavbarTop = ({ user } : any) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const router = useRouter()
@@ -51,7 +52,7 @@ const NavbarTop = () => {
       </div>
       {/* Profil utilisateur et paramètres */}
       <div className="flex items-center gap-4 mr-8">
-        <ShopSeller />
+        <Info user={user} />
         <Link href="/dashboard/settings" className="rounded-full p-2 bg-orange-50 hover:bg-orange-100 transition-colors">
           <Settings className="h-5 w-5 text-orange-500" />
         </Link>

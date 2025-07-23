@@ -3,6 +3,8 @@
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
+import { ImQuotesLeft } from "react-icons/im";
+import { ImQuotesRight } from "react-icons/im";
 
 type Testimonial = {
     quote: string;
@@ -111,37 +113,46 @@ export const AnimatedTestimonials = ({
                             ease: "easeInOut",
                         }}
                     >
-                        <h3 className="text-2xl font-bold text-orange-500">
+                        <h3 className="text-2xl font-bold ">
                             {testimonials[active].name}
                         </h3>
-                        <p className="text-sm text-orange-400">
+                        <p className="text-sm ">
                             {testimonials[active].designation}
                         </p>
-                        <motion.p className="mt-8 text-lg text-gray-700">
-                            {testimonials[active].quote.split(" ").map((word, index) => (
-                                <motion.span
-                                    key={index}
-                                    initial={{
-                                        filter: "blur(10px)",
-                                        opacity: 0,
-                                        y: 5,
-                                    }}
-                                    animate={{
-                                        filter: "blur(0px)",
-                                        opacity: 1,
-                                        y: 0,
-                                    }}
-                                    transition={{
-                                        duration: 0.2,
-                                        ease: "easeInOut",
-                                        delay: 0.02 * index,
-                                    }}
-                                    className="inline-block"
-                                >
-                                    {word}&nbsp;
-                                </motion.span>
-                            ))}
-                        </motion.p>
+                        <div className="mt-8 flex flex-col  gap-1">
+                             <div className="flex justify-start ">
+                                <ImQuotesLeft />
+                            </div>
+                            <motion.p className=" text-lg text-gray-700">
+                                {testimonials[active].quote.split(" ").map((word, index) => (
+                                    <motion.span
+                                        key={index}
+                                        initial={{
+                                            filter: "blur(10px)",
+                                            opacity: 0,
+                                            y: 5,
+                                        }}
+                                        animate={{
+                                            filter: "blur(0px)",
+                                            opacity: 1,
+                                            y: 0,
+                                        }}
+                                        transition={{
+                                            duration: 0.2,
+                                            ease: "easeInOut",
+                                            delay: 0.02 * index,
+                                        }}
+                                        className="inline-block"
+                                    >
+                                        {word}&nbsp;
+                                    </motion.span>
+                                ))}
+                            </motion.p>
+                            <div className="flex justify-end ">
+                                <ImQuotesRight />
+                            </div>
+                        </div>
+
                     </motion.div>
                     <div className="flex gap-4 pt-12 md:pt-0">
                         <button

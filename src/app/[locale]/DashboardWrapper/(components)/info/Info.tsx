@@ -1,21 +1,29 @@
-//import { useI18n } from '@/locales/client';
+"use client";
+
+import { logoutUser } from "@/actions/auth";
 import { FaRegUser, FaSignOutAlt } from "react-icons/fa";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "../../../../../components/ui/hover-card";
+import React from "react";
+import { useRouter } from 'next/navigation';
 
 
 
+const Info = ({ user }: { user: { email: string } }) => {
 
-const Info = () => {
+  const router = useRouter();
+  
   return (
     <HoverCard openDelay={0} closeDelay={100}>
       <HoverCardTrigger asChild>
         <div className="flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer transition-colors group hover:bg-orange-50">
           <FaRegUser className="h-5 w-5 text-orange-500" />
-          <span className="font-semibold text-sm text-gray-700">Mon compte</span>
+          <span className="font-semibold text-sm text-gray-700">
+            {user?.email }
+          </span>
         </div>
       </HoverCardTrigger>
       <HoverCardContent
@@ -35,15 +43,19 @@ const Info = () => {
             <div className="border-t border-orange-100 my-2"></div>
             <div
               className="flex items-center px-3 py-2 rounded-md cursor-pointer hover:bg-orange-50"
+              onClick={async () => {
+                await logoutUser();
+                router.refresh();
+              }}
             >
               <FaSignOutAlt className="h-4 w-4 mr-2 text-red-500" />
-              <span className="text-sm font-medium text-red-500">Déconnexion</span>
+              <span className="text-sm font-medium  text-red-500">Déconnexion</span>
             </div>
           </div>
         </div>
       </HoverCardContent>
     </HoverCard>
   );
-};
+}
 
 export default Info;

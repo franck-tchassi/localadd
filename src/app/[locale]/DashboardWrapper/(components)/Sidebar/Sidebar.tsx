@@ -13,9 +13,10 @@ import {
   LogOut,
   PlusSquare,
 } from 'lucide-react';
+import { logoutUser } from "@/actions/auth";
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
 type IconType = React.ComponentType<{ className?: string; size?: number | string; color?: string }>;
@@ -38,6 +39,8 @@ export const Sidebar = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const handleResize = () => {
@@ -83,13 +86,30 @@ export const Sidebar = () => {
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {sidebarLinks.map(({ label, href, icon: Icon, isLogout }) => {
             const isActive = pathname === href;
+            if (isLogout) {
+              return (
+                <button
+                  key={label}
+                  onClick={async () => {
+                    await logoutUser();
+                    router.refresh();
+                  }}
+                  className="block w-full text-left cursor-pointer"
+                >
+                  <div className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-colors font-medium text-base hover:bg-red-50 text-red-600 group relative`}>
+                    <Icon className="h-5 w-5 text-red-500" />
+                    <span>{label}</span>
+                  </div>
+                </button>
+              );
+            }
             return (
               <Link href={href} key={label} className="block">
                 <div className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-colors font-medium text-base
-                  ${isActive ? 'bg-orange-100 text-orange-600' : isLogout ? 'hover:bg-red-50 text-red-600' : 'hover:bg-gray-100 text-gray-700 dark:text-gray-300'}
+                  ${isActive ? 'bg-orange-100 text-orange-600' : 'hover:bg-gray-100 text-gray-700 dark:text-gray-300'}
                   group relative`}
                 >
-                  <Icon className={`h-5 w-5 ${isActive ? 'text-orange-500' : isLogout ? 'text-red-500' : 'text-gray-400'}`} />
+                  <Icon className={`h-5 w-5 ${isActive ? 'text-orange-500' : 'text-gray-400'}`} />
                   <span>{label}</span>
                   {isActive && <span className="absolute left-0 top-0 h-full w-1 bg-orange-500 rounded-r" />}
                 </div>

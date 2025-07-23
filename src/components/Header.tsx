@@ -13,6 +13,7 @@ import {
     NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
+import LocaleSelectLanguage from "@/app/[locale]/LocaleSelectLanguage"
 
 const navLinks = [
     {
@@ -113,11 +114,14 @@ const Header = () => {
 
                 {/* Actions */}
                 <div className="hidden md:flex items-center gap-2 lg:gap-3">
-                    <Link href="/signin">
-                        <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-colors font-semibold px-5 py-2 rounded-lg shadow-none">Se connecter</Button>
+                    <div className="relative">
+                        <LocaleSelectLanguage />
+                    </div>
+                    <Link href="/auth/sign-in">
+                        <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 cursor-pointer hover:bg-orange-50 hover:text-orange-600 transition-colors font-semibold px-5 py-2 rounded-lg shadow-none">Se connecter</Button>
                     </Link>
                     <Link href="/demo">
-                        <Button size="sm" className="bg-gradient-to-r from-orange-400 to-orange-600 text-white font-bold px-5 py-2 rounded-lg shadow-md hover:from-orange-500 hover:to-orange-700 transition-all border-0">Demander un démo</Button>
+                        <Button size="sm" className="bg-gradient-to-r cursor-pointer from-orange-400 to-orange-600 text-white font-bold px-5 py-2 rounded-lg shadow-md hover:from-orange-500 hover:to-orange-700 transition-all border-0">Demander un démo</Button>
                     </Link>
                 </div>
 
