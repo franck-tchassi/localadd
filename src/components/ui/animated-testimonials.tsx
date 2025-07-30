@@ -52,12 +52,7 @@ export const AnimatedTestimonials = ({
                             {testimonials.map((testimonial, index) => (
                                 <motion.div
                                     key={testimonial.src}
-                                    initial={{
-                                        opacity: 0,
-                                        scale: 0.9,
-                                        z: -100,
-                                        rotate: randomRotateY(),
-                                    }}
+                                    
                                     animate={{
                                         opacity: isActive(index) ? 1 : 0.7,
                                         scale: isActive(index) ? 1 : 0.95,
