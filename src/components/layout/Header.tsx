@@ -44,15 +44,6 @@ const navLinks = [
         ]
     },
     {
-        name: "Ressources",
-        href: "#ressources",
-        items: [
-            { title: "Documentation", href: "#docs", description: "Guide complet d'utilisation" },
-            { title: "Tutoriels", href: "#tutoriels", description: "Vidéos et guides pas à pas" },
-            { title: "FAQ", href: "#faq", description: "Réponses aux questions fréquentes" },
-        ]
-    },
-    {
         name: "Apropos",
         href: "#apropos",
         items: [
@@ -70,8 +61,9 @@ const Header = () => {
         <header className="w-full border-b bg-background/80 backdrop-blur sticky top-0 z-50 shadow-sm">
             <div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-10">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 font-extrabold text-2xl md:text-3xl">
-                    <span className="tracking-tight text-orange-500 drop-shadow-lg">localadd</span>
+                <Link href="/dashboards" className="flex items-center gap-4 w-full ">
+                    <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth={2}  strokeLinecap="round"  strokeLinejoin="round"  className="icon text-orange-500  icon-tabler icons-tabler-outline icon-tabler-map-2 scale-[2.5] "><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 18.5l-3 -1.5l-6 3v-13l6 -3l6 3l6 -3v7.5" /><path d="M9 4v13" /><path d="M15 7v5.5" /><path d="M21.121 20.121a3 3 0 1 0 -4.242 0c.418 .419 1.125 1.045 2.121 1.879c1.051 -.89 1.759 -1.516 2.121 -1.879z" /><path d="M19 18v.01" /></svg>
+                    <span className="text-2xl font-semibold text-orange-500 ml-4">Locale Add</span>
                 </Link>
 
                 {/* Desktop Nav */}

@@ -1,11 +1,13 @@
 import ForgotPassword from '@/components/auth/ForgotPassword'
 import React from 'react'
 
-type Props = {}
 
-const ForgotPasswordPage = (props: Props) => {
+
+const ForgotPasswordPage = () => {
   return (
-    <div>Forgot Password Page</div>
+    <div>
+      <ForgotPassword />
+    </div>
   )
 }
 
