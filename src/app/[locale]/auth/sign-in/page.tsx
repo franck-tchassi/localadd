@@ -1,4 +1,6 @@
 
+export const dynamic = "force-dynamic";
+
 import { getCurrentSession, loginUser } from '@/actions/auth'
 import SignIn from '@/components/auth/SignIn';
 import { redirect } from 'next/navigation';
