@@ -1,156 +1,223 @@
-"use client"
+'use client';
 
-import React, { useActionState } from 'react'
-import { Loader2 } from "lucide-react"
-import Link from 'next/link'
-import Image from 'next/image'
-import { AnimatedTestimonialsDemo } from '@/app/[locale]/(landing)/sections/AnimatedTestimonialsDemo'
+import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { AnimatedTestimonialsDemo } from '@/app/[locale]/(landing)/sections/AnimatedTestimonialsDemo';
+import { useI18n } from '@/locales/client';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '@/components/ui/input-otp';
+import { useRouter } from 'next/navigation';
 
-const initialState = {
-    message: '',
-}
-
-type SignUpProps = {
-    action: (prevState: any, formData: FormData) => Promise<{ message: string | undefined }>
+interface SignUpProps {
+  action: (email: string, password: string) => Promise<{ message: string; requiresOTP: boolean; email?: string }>;
 }
 
 const SignUp = ({ action }: SignUpProps) => {
-    const [showPassword, setShowPassword] = React.useState(false);
-    const [showConfirm, setShowConfirm] = React.useState(false);
-    const [state, formAction, isPending] = useActionState(action, initialState);
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [message, setMessage] = useState('');
+  const [requiresOTP, setRequiresOTP] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [success, setSuccess] = useState('');
+  const t = useI18n();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const router = useRouter();
 
-    return (
-        <div className="min-h-screen h-screen w-screen bg-gray-50 flex items-center justify-center">
-            <div className="w-full h-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white shadow-2xl rounded-2xl overflow-hidden">
-                {/* Colonne gauche : d'avis */}
-                <div className="flex flex-col justify-center items-center bg-gradient-to-br from-orange-400 to-orange-500 p-0 text-white relative h-full w-full">
-                    <div className="flex flex-1 w-full h-full items-center justify-center">
-                        <AnimatedTestimonialsDemo />
-                    </div>
-                </div>
-                {/* Colonne droite : formulaire d'inscription */}
-                <div className="flex flex-col justify-center items-center p-8 h-full w-full">
-                    <h2 className="mb-2 text-3xl font-extrabold text-orange-400 text-center">S'inscrire</h2>
-                    <p className="mb-6 text-center text-base text-gray-600">Découvrez votre classement Google actuel et obtenez des stratégies d'amélioration concrètes.</p>
-                    {/* Bouton Google */}
-                    <button
-                        type="button"
-                        className="w-full flex items-center justify-center gap-2 py-2 px-4 mb-4 border border-gray-300 rounded-2xl shadow-sm text-base font-medium cursor-pointer bg-white  text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:text-orange-500 transition-colors duration-200"
-                        style={{ height: '48px' }}
-                        onClick={() => window.location.href = '/auth/google'}
-                    >
-                        <Image src="/google/googlee.svg" alt="Google" width={20} height={20} />
-                        S'inscrire avec Google
-                    </button>
-                    <div className="flex items-center w-full my-4">
-                        <div className="flex-1 h-px bg-gray-300" />
-                        <span className="px-3 text-sm text-gray-500 bg-white font-medium">ou continuez avec</span>
-                        <div className="flex-1 h-px bg-gray-300" />
-                    </div>
-                    <form action={formAction} className="space-y-6 w-full max-w-md">
-                        {/* Message d'erreur général */}
-                        {state?.message && !state.message.toLowerCase().includes('email') && !state.message.toLowerCase().includes('password') && (
-                            <p className="mb-2 text-center text-sm text-red-600">{state.message}</p>
-                        )}
-                        <div>
-                            {/* Erreur email */}
-                            {state?.message && state.message.toLowerCase().includes('email') && (
-                                <p className="mb-1 text-sm text-red-600">{state.message}</p>
-                            )}
-                            <div className="mt-1 relative">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-2xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-base"
-                                    placeholder="Entrer votre email"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            {/* Erreur mot de passe */}
-                            {state?.message && state.message.toLowerCase().includes('password') && (
-                                <p className="mb-1 text-sm text-red-600">{state.message}</p>
-                            )}
-                            <div className="mt-1 relative">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? "text" : "password"}
-                                    autoComplete="new-password"
-                                    required
-                                    minLength={8}
-                                    className="block w-full px-3 py-2 border border-gray-300 rounded-2xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-base pr-10"
-                                    placeholder="Entrer votre mot de passe"
-                                />
-                                <button
-                                    type="button"
-                                    tabIndex={-1}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-500"
-                                    onClick={() => setShowPassword(v => !v)}
-                                >
-                                    {showPassword ? (
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M9.88 9.88A3 3 0 0012 15a3 3 0 002.12-5.12M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C3.5 7.5 7.5 4.5 12 4.5c4.5 0 8.5 3 9.75 7.5-.5 1.5-1.5 3-3 4.5M3 3l18 18" />
-                                        </svg>
-                                    ) : (
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C3.5 7.5 7.5 4.5 12 4.5c4.5 0 8.5 3 9.75 7.5-1.25 4.5-5.25 7.5-9.75 7.5-4.5 0-8.5-3-9.75-7.5z" />
-                                        </svg>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isPending}
-                                className="w-full flex justify-center py-2 px-4 border cursor-pointer border-transparent rounded-2xl shadow-sm text-base font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200"
-                            >
-                                {isPending ? (
-                                    <>
-                                        <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                                        Inscription en cours...
-                                    </>
-                                ) : "S'inscrire"}
-                            </button>
-                        </div>
-                        <p className="mt-4 text-xs text-gray-500 text-center">
-                            En vous inscrivant, vous acceptez nos{' '}
-                            <Link href="/terms" className="text-orange-600 hover:underline">conditions d'utilisation</Link>{' '}et{' '}
-                            <Link href="/privacy" className="text-orange-600 hover:underline">politique de confidentialité</Link>.
-                        </p>
-                    </form>
-                    <div className="mt-8 w-full">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300" />
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-white text-gray-500">Déjà inscrit ?</span>
-                            </div>
-                        </div>
-                        <div className="mt-6">
-                            <p className="text-sm text-gray-600 text-center">
-                                Vous avez déjà un compte ?{' '}
-                                <Link
-                                    href="/auth/sign-in"
-                                    className="text-orange-600 cursor-pointer hover:underline hover:text-orange-700"
-                                >
-                                    Connectez-vous
-                                </Link>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    const res = await action(email, password);
+    setMessage(res.message);
+    setRequiresOTP(res.requiresOTP);
+    setLoading(false);
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      setMessage('Veuillez entrer un code à 6 chiffres');
+      return;
+    }
+    setVerifying(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/complete-registration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la vérification');
+      if (data.success) {
+        setSuccess('Inscription complétée avec succès !');
+        setTimeout(() => router.push('/auth/sign-in'), 2000);
+      } else {
+        setMessage(data.error || 'Erreur inconnue');
+      }
+    } catch (err: any) {
+      setMessage(err.message);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <div className="h-screen w-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-full h-full mx-auto grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+        {/* Colonne gauche : témoignages */}
+        {!isMobile && (
+          <div className="hidden md:flex flex-col justify-center items-center bg-gradient-to-br from-orange-500 to-orange-600 text-white relative">
+            <div className="flex flex-1 w-full h-full items-center justify-center">
+              <AnimatedTestimonialsDemo />
             </div>
+          </div>
+        )}
+
+        {/* Colonne droite : formulaire */}
+        <div className="flex flex-col justify-center items-center p-6 md:p-10 overflow-y-auto">
+          <div className="w-full max-w-md space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl md:text-3xl font-bold text-orange-600">
+                {requiresOTP ? 'Vérification OTP' : t('landing.signup.title')}
+              </h2>
+              {!requiresOTP && (
+                <p className="mt-2 text-gray-600">
+                  {t('landing.signup.subtitle')}
+                </p>
+              )}
+              {requiresOTP && (
+                <p className="mt-2 text-gray-600">
+                  Nous avons envoyé un code à 6 chiffres à{' '}
+                  <span className="font-semibold">{email}</span>
+                </p>
+              )}
+            </div>
+
+            {message && (
+              <div className="p-3 bg-red-50 text-red-600 text-sm text-center rounded-lg whitespace-pre-line">
+                {message}
+              </div>
+            )}
+            {success && (
+              <div className="p-3 bg-green-50 text-green-600 text-sm text-center rounded-lg">
+                {success}
+              </div>
+            )}
+
+            {!requiresOTP ? (
+              <form onSubmit={handleSignUp} className="space-y-5">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('landing.signup.input_mail')}
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('landing.signup.input_password')}
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                      className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition-colors"
+                    >
+                      {showPassword ? '🙈' : '👁️'}
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-3 px-4 rounded-lg bg-orange-600 text-white font-medium hover:bg-orange-700 transition-colors disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                      Inscription...
+                    </>
+                  ) : (
+                    t('landing.signup.sign_up')
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOTP} className="space-y-5">
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={(v) => setOtp(v)}
+                  >
+                    <InputOTPGroup>
+                      {[...Array(6)].map((_, i) => (
+                        <InputOTPSlot
+                          key={i}
+                          index={i}
+                          className="w-12 h-12 border-2 rounded-lg text-lg"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <button
+                  type="submit"
+                  disabled={verifying}
+                  className="w-full flex justify-center items-center py-3 px-4 rounded-lg bg-orange-600 text-white font-medium hover:bg-orange-700 transition-colors disabled:opacity-70"
+                >
+                  {verifying ? (
+                    <>
+                      <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                      Vérification...
+                    </>
+                  ) : (
+                    'Valider l’inscription'
+                  )}
+                </button>
+              </form>
+            )}
+
+            {!requiresOTP && (
+              <div className="mt-6 text-center text-sm text-gray-600">
+                {t('landing.signup.you_have_account')}{' '}
+                <Link
+                  href="/auth/sign-in"
+                  className="font-medium text-orange-600 hover:text-orange-500"
+                >
+                  {t('landing.signup.you_have_account_signin')}
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-    )
+      </div>
+    </div>
+  );
+};
 
-}
-
-export default SignUp
+export default SignUp;

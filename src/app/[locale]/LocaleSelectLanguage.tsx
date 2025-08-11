@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from 'react';
 import { useChangeLocale, useCurrentLocale, useI18n } from '../../locales/client';
 

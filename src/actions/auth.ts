@@ -8,10 +8,14 @@ import type { User, Session } from "../../generated/prisma";
 
 import { cookies } from "next/headers";
 import { cache } from "react";
+//import { generateOTP, sendOTP, checkOTPRestrictions, trackOTPRequests } 
+
 
 
 // Password reset
 import { randomBytes } from "crypto";
+import { checkOTPRestrictions, generateOTP, sendOTP, trackOTPRequests, verifyOTP } from "@/lib/otp/otpUtils";
+import redis from "@/lib/otp/redis";
 
 export const requestPasswordReset = async (email: string) => {
     const user = await prisma.user.findUnique({ where: { email } });
@@ -57,6 +61,34 @@ export const resetPassword = async (token: string, newPassword: string) => {
     return { success: true };
 };
 
+export async function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!user) {
+    return { error: "Utilisateur non trouvé" }
+  }
+
+  // Vérifier l'ancien mot de passe
+  const currentPasswordHash = await hashPassword(currentPassword)
+  if (currentPasswordHash !== user.passwordHash) {
+    return { error: "Mot de passe actuel incorrect" }
+  }
+
+  // Mettre à jour le mot de passe
+  const newPasswordHash = await hashPassword(newPassword)
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: newPasswordHash },
+  })
+
+  return { success: true }
+}
 
 
 export async function generateSessionToken(): Promise<string> {
@@ -66,12 +98,12 @@ export async function generateSessionToken(): Promise<string> {
     return token;
 }
 
-export async function createSession(token: string, userId: number | null = null): Promise<Session> {
+export async function createSession(token: string, userId: string | null = null): Promise<Session> {
     const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
     const session: Session = {
         id: sessionId,
         userId,
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 2)// 2 heures
     };
     await prisma.session.create({
         data: session
@@ -100,15 +132,6 @@ export async function validateSessionToken(token: string): Promise<SessionValida
         return { session: null, user: null };
     }
 
-    // Prolongation de session si nécessaire
-    if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
-        const newExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
-        await prisma.session.update({
-            where: { id: session.id },
-            data: { expiresAt: newExpiresAt }
-        });
-        session.expiresAt = newExpiresAt;
-    }
 
     // Gestion du cas où user est null
     if (!user) {
@@ -128,7 +151,7 @@ export async function invalidateSession(sessionId: string): Promise<void> {
     await prisma.session.delete({ where: { id: sessionId } });
 }
 
-export async function invalidateAllSessions(userId: number): Promise<void> {
+export async function invalidateAllSessions(userId: string): Promise<void> {
     await prisma.session.deleteMany({
         where: {
             userId: userId
@@ -189,33 +212,77 @@ export const verifyPassword = async (password: string, hash: string) => {
     return passwordHash === hash;
 }
 
-export const registerUser = async (email: string, password: string, storeName?: string) => {
-    const passwordHash = await hashPassword(password);
-    try {
-        const user = await prisma.user.create({
-            data: {
-                email,
-                passwordHash,
-                // storeName si vous souhaitez le gérer
-            }
-        });
-
-        const safeUser = {
-            ...user,
-            passwordHash: undefined,
-        }
-
-        return {
-            user: safeUser,
-            error: null
-        }
-    } catch (e) {
-        return {
-            user: null,
-            error: "Failled to register User"
-        }
+export const registerUser = async (email: string, password: string) => {
+  try {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return { user: null, error: "Email déjà utilisé", requiresOTP: false };
     }
-}
+
+    await checkOTPRestrictions(email);
+    await trackOTPRequests(email);
+
+    const otp = generateOTP();
+    await sendOTP(email, otp);
+
+    const passwordHash = await hashPassword(password);
+    const tempUserKey = `temp_user:${email}`;
+    await redis.set(tempUserKey, JSON.stringify({ email, passwordHash }), "EX", 600);
+
+    return {
+      user: null,
+      error: null,
+      requiresOTP: true
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      user: null,
+      error: "Échec de l'inscription",
+      requiresOTP: false
+    };
+  }
+};
+
+export const completeRegistration = async (email: string, otp: string) => {
+  try {
+    await verifyOTP(email, otp);
+
+    const tempUserKey = `temp_user:${email}`;
+    const tempUserData = await redis.get(tempUserKey);
+    
+    if (!tempUserData) {
+      throw new Error("Session d'inscription expirée");
+    }
+
+    const { email: userEmail, passwordHash } = JSON.parse(tempUserData);
+
+    const user = await prisma.user.create({
+      data: { 
+        email: userEmail, 
+        passwordHash,
+        emailVerified: new Date()
+      },
+    });
+
+    await redis.del(tempUserKey);
+
+    const safeUser = {
+      ...user,
+      passwordHash: undefined,
+    };
+
+    return {
+      user: safeUser,
+      error: null
+    };
+  } catch (err: any) {
+    return {
+      user: null,
+      error: err.message
+    };
+  }
+};
 
 export const loginUser = async (email: string, password: string) => {
     const user = await prisma.user.findUnique({

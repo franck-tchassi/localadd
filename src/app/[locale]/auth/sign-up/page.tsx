@@ -1,49 +1,73 @@
-export const dynamic = "force-dynamic";
-
-import { getCurrentSession, registerUser } from '@/actions/auth'
+// app/auth/sign-up/page.tsx
+import { getCurrentSession, registerUser } from '@/actions/auth';
 import SignUp from '@/components/auth/SignUp';
 import { redirect } from 'next/navigation';
-import React from 'react'
-import zod from "zod"
+import { z } from 'zod';
 
+const SignUpSchema = z.object({
+  email: z.string()
+    .email("Veuillez entrer une adresse email valide")
+    .min(5, "L'email doit contenir au moins 5 caractères"),
+  password: z.string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .regex(/[A-Z]/, "Doit contenir au moins une majuscule")
+    .regex(/[a-z]/, "Doit contenir au moins une minuscule")
+    .regex(/[0-9]/, "Doit contenir au moins un chiffre")
+    .regex(/[^A-Za-z0-9]/, "Doit contenir au moins un caractère spécial")
+});
 
-const SignUpSchema = zod.object({
-    email: zod.string().email(),
-    password: zod.string().min(5)
-})
+export default async function SignUpPage() {
+  const session = await getCurrentSession();
 
-const SignUpPage = async () => {
+  // Si déjà connecté → redirection
+  if (session.user) {
+    redirect('/');
+  }
 
-    const { user } = await getCurrentSession();
+  // Action pour inscription
+  const action = async (email: string, password: string) => {
+    'use server';
 
-    if (user) {
-        return redirect("/")
+    // Validation des données
+    const validation = SignUpSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const formattedErrors = validation.error.issues.map(issue => {
+        const field = issue.path[0];
+        return `• ${field === 'email' ? 'Email' : 'Mot de passe'}: ${issue.message}`;
+      });
+      return {
+        message: formattedErrors.join('\n'),
+        requiresOTP: false,
+        email: ''
+      };
     }
 
-    const action = async (prevState: any, formData: FormData) => {
-        "use server";
-        const parsed = SignUpSchema.safeParse(Object.fromEntries(formData));
-        if (!parsed.success) {
-            return {
-                message: "Invalid from data",
-            };
-        }
+    try {
+      const { error, requiresOTP } = await registerUser(email, password);
 
-        const { email, password } = parsed.data;
-        const { user, error } = await registerUser(email, password);
-        if (error) {
-            return { message: error }
-        } else if (user) {
-            // Après inscription, rediriger vers la page de connexion
-            redirect("/auth/sign-in");
-            return { message: undefined };
-        }
-        return { message: "Unexpected error" };
+      if (error) {
+        return {
+          message: error,
+          requiresOTP: false,
+          email: ''
+        };
+      }
+
+      // Retourne l'info au client pour basculer vers OTP si nécessaire
+      return {
+        message: requiresOTP ? '' : 'Inscription réussie',
+        requiresOTP: requiresOTP || false,
+        email: requiresOTP ? email : ''
+      };
+    } catch (err) {
+      console.error('Erreur lors de l\'inscription:', err);
+      return {
+        message: 'Une erreur inattendue est survenue',
+        requiresOTP: false,
+        email: ''
+      };
     }
+  };
 
-    return (
-        <SignUp action={action} />
-    )
+  return <SignUp action={action} />;
 }
-
-export default SignUpPage
