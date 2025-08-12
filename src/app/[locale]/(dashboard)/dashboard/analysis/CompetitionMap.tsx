@@ -26,10 +26,6 @@ export default function CompetitionMap({ center, heatmapData, currentBusiness }:
   const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
-      setLoadError('Clé API Google Maps manquante');
-      return;
-    }
 
     if (typeof window !== 'undefined' && !window.google) {
       const script = document.createElement('script');

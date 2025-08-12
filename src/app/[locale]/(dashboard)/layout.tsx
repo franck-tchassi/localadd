@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar"
+
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/sidebar"
 import { getCurrentSession } from "@/actions/auth"
 import { redirect } from "next/navigation"
+import { AppSidebar } from "@/components/app-sidebar"
 
 export default async function DashboardLayout({
   children
@@ -36,7 +37,7 @@ export default async function DashboardLayout({
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
+          <div className="@container/main p-12 flex flex-1 flex-col gap-2">
             {children}
           </div>
         </div>

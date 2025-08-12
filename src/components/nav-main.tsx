@@ -42,32 +42,21 @@ const navSections: NavSection[] = [
     title: "Navigation",
     items: [
       {
-        title: "Dashboard",
-        url: "/dashboard",
+        title: "Mode recherche",
+        url: "/dashboard/business/research",
         icon: LayoutDashboard,
       },
       {
-        title: "Generator",
-        url: "/dashboard/generator",
+        title: "Mode vente",
+        url: "/dashboard/business/sales",
         icon: FileCode2,
-        badge: "New",
-      },
-      {
-        title: "Clients",
-        url: "/dashboard/clients",
-        icon: IconUsers,
+        
       },
     ],
   },
   {
     title: "Billing",
     items: [
-      {
-        title: "Subscription",
-        url: "/dashboard/account/subscription",
-        icon: IconCreditCard,
-        highlight: true,
-      },
       {
         title: "Upgrade Plan",
         url: "/dashboard/account/billing",
@@ -76,16 +65,7 @@ const navSections: NavSection[] = [
       },
     ],
   },
-  {
-    title: "Settings",
-    items: [
-      {
-        title: "Configuration",
-        url: "/dashboard/profile",
-        icon: IconSettings,
-      },
-    ],
-  },
+
 ]
 
 

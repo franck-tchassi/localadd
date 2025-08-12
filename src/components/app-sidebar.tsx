@@ -25,26 +25,12 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
       {...props} 
       className="border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     >
-      <SidebarHeader className="border-b p-4">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Image
-            src="/logo/localink.png"
-            alt="Logo Localink"
-            width={120}
-            height={40}
-            className="h-8 w-auto object-contain"
-            priority
-          />
-        </Link>
-      </SidebarHeader>
-      
+     
       <SidebarContent className="px-0">
         <NavMain />
       </SidebarContent>
       
-      <SidebarFooter className="border-t p-4">
-       
-      </SidebarFooter>
+      
     </Sidebar>
   )
 }
